@@ -1,3 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NotificacionesApp</string>
+    <string name="configuration_title">Configuración de Notificaciones</string>
+    <string name="light_mode">🌞 Modo Claro</string>
+    <string name="dark_mode">🌙 Modo Oscuro</string>
+    <string name="username_label">Nombre de usuario:</string>
+    <string name="username_hint">Ingresa tu nombre</string>
+    <string name="language_label">Idioma:</string>
+    <string name="volume_label">Volumen de notificaciones:</string>
+    <string name="last_access">Último acceso:</string>
+    <string name="last_location">Última ubicación:</string>
+    <string name="total_usage">Tiempo total:</string>
+    <string name="save_button">GUARDAR CONFIGURACIÓN</string>
+    <string name="configurations_saved">Configuraciones guardadas</string>
+    <string name="no_data">--</string>
+
+    <!-- Idiomas -->
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+    <string name="french">Français</string>
+    <string name="german">Deutsch</string>
 </resources>

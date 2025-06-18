@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BenachrichtigungenApp</string>
+    <string name="configuration_title">Benachrichtigungseinstellungen</string>
+    <string name="light_mode">🌞 Heller Modus</string>
+    <string name="dark_mode">🌙 Dunkler Modus</string>
+    <string name="username_label">Benutzername:</string>
+    <string name="username_hint">Geben Sie Ihren Namen ein</string>
+    <string name="language_label">Sprache:</string>
+    <string name="volume_label">Benachrichtigungslautstärke:</string>
+    <string name="last_access">Letzter Zugriff:</string>
+    <string name="last_location">Letzter Standort:</string>
+    <string name="total_usage">Gesamtzeit:</string>
+    <string name="save_button">KONFIGURATION SPEICHERN</string>
+    <string name="configurations_saved">Einstellungen gespeichert</string>
+    <string name="no_data">--</string>
+
+    <!-- Languages -->
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+    <string name="french">Français</string>
+    <string name="german">Deutsch</string>
+</resources>

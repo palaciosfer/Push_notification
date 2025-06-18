@@ -9,39 +9,56 @@ import android.util.Log
 import android.view.Gravity
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.messaging.FirebaseMessaging
 import java.util.*
 
+// ViewModel para manejar el estado del tema
+class ThemeViewModel : ViewModel() {
+    var isDarkMode = false
+        private set
+
+    fun toggleDarkMode() {
+        isDarkMode = !isDarkMode
+    }
+
+    fun setDarkMode(darkMode: Boolean) {
+        isDarkMode = darkMode
+    }
+}
+
 class MainActivity : AppCompatActivity() {
     private lateinit var configManager: ConfigurationManager
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var appUsageTracker: AppUsageTracker
+    private lateinit var themeViewModel: ThemeViewModel
 
     private lateinit var etUserName: EditText
-    private lateinit var switchDarkMode: Switch
     private lateinit var spinnerLanguage: Spinner
     private lateinit var seekBarVolume: SeekBar
     private lateinit var tvLastAccess: TextView
     private lateinit var tvLastLocation: TextView
     private lateinit var tvTotalUsage: TextView
     private lateinit var btnSave: Button
+    private lateinit var btnToggleTheme: Button
     private lateinit var rootLayout: LinearLayout
+    private lateinit var scrollView: ScrollView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar managers primero
+        // Inicializar managers y ViewModel
         configManager = ConfigurationManager(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         appUsageTracker = AppUsageTracker(this)
+        themeViewModel = ThemeViewModel()
 
-        // Aplicar el tema guardado antes de crear el layout
-        applyInitialTheme()
+        // Cargar tema guardado
+        loadSavedTheme()
 
         // Crear layout programáticamente
         createLayout()
@@ -65,83 +82,79 @@ class MainActivity : AppCompatActivity() {
         appUsageTracker.startTracking()
     }
 
-    private fun applyInitialTheme() {
-        val config = configManager.loadConfiguration()
-        if (config.darkModeEnabled) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-    }
-
     private fun createLayout() {
-        val scrollView = ScrollView(this)
+        scrollView = ScrollView(this)
 
         rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(32, 32, 32, 32)
         }
 
+        // Aplicar tema inicial
+        applyTheme()
+
         // Título de la aplicación
         val tvTitle = TextView(this).apply {
-            text = "Configuración de Notificaciones"
+            text = getString(R.string.configuration_title)
             textSize = 24f
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 24)
-            setTextColor(getThemeColor())
         }
         rootLayout.addView(tvTitle)
 
+        // Botón para cambiar tema
+        btnToggleTheme = Button(this).apply {
+            text = if (themeViewModel.isDarkMode) getString(R.string.light_mode) else getString(R.string.dark_mode)
+            textSize = 14f
+            setPadding(16, 12, 16, 12)
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = Gravity.CENTER
+                setMargins(0, 0, 0, 24)
+            }
+            layoutParams = params
+        }
+        rootLayout.addView(btnToggleTheme)
+
         // Campo de nombre de usuario
         val tvUserNameLabel = TextView(this).apply {
-            text = "Nombre de usuario:"
+            text = getString(R.string.username_label)
             textSize = 16f
             setPadding(0, 16, 0, 8)
-            setTextColor(getThemeColor())
         }
         rootLayout.addView(tvUserNameLabel)
 
         etUserName = EditText(this).apply {
-            hint = "Ingresa tu nombre"
+            hint = getString(R.string.username_hint)
             setPadding(16, 16, 16, 16)
-            setBackgroundColor(getEditTextBackgroundColor())
-            setTextColor(getThemeColor())
-            setHintTextColor(getHintColor())
         }
         rootLayout.addView(etUserName)
 
-        // Switch modo oscuro
-        val switchLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 24, 0, 16)
-        }
-
-        val tvDarkModeLabel = TextView(this).apply {
-            text = "Modo oscuro"
-            textSize = 16f
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            setTextColor(getThemeColor())
-        }
-        switchLayout.addView(tvDarkModeLabel)
-
-        switchDarkMode = Switch(this)
-        switchLayout.addView(switchDarkMode)
-        rootLayout.addView(switchLayout)
-
         // Selector de idioma
         val tvLanguageLabel = TextView(this).apply {
-            text = "Idioma:"
+            text = getString(R.string.language_label)
             textSize = 16f
+            setTextColor(Color.parseColor("#000000"))
             setPadding(0, 16, 0, 8)
-            setTextColor(getThemeColor())
+
         }
         rootLayout.addView(tvLanguageLabel)
 
         spinnerLanguage = Spinner(this).apply {
             setPadding(16, 16, 16, 16)
+
+
         }
 
-        val languages = arrayOf("Español", "English", "Français", "Deutsch")
+        val languages = arrayOf(
+            getString(R.string.spanish),
+            getString(R.string.english),
+            getString(R.string.french),
+            getString(R.string.german)
+
+        )
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, languages)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerLanguage.adapter = adapter
@@ -149,10 +162,9 @@ class MainActivity : AppCompatActivity() {
 
         // Control de volumen
         val tvVolumeLabel = TextView(this).apply {
-            text = "Volumen de notificaciones:"
+            text = getString(R.string.volume_label)
             textSize = 16f
             setPadding(0, 24, 0, 8)
-            setTextColor(getThemeColor())
         }
         rootLayout.addView(tvVolumeLabel)
 
@@ -165,74 +177,142 @@ class MainActivity : AppCompatActivity() {
 
         // Información de último acceso
         tvLastAccess = TextView(this).apply {
-            text = "Último acceso: --"
+            text = "${getString(R.string.last_access)} ${getString(R.string.no_data)}"
             textSize = 14f
             setPadding(0, 16, 0, 8)
-            setTextColor(getSecondaryTextColor())
         }
         rootLayout.addView(tvLastAccess)
 
         // Información de última ubicación
         tvLastLocation = TextView(this).apply {
-            text = "Última ubicación: --"
+            text = "${getString(R.string.last_location)} ${getString(R.string.no_data)}"
             textSize = 14f
             setPadding(0, 8, 0, 8)
-            setTextColor(getSecondaryTextColor())
         }
         rootLayout.addView(tvLastLocation)
 
         // Información de tiempo total de uso
         tvTotalUsage = TextView(this).apply {
-            text = "Tiempo total: --"
+            text = "${getString(R.string.total_usage)} ${getString(R.string.no_data)}"
             textSize = 14f
             setPadding(0, 8, 0, 24)
-            setTextColor(getSecondaryTextColor())
         }
         rootLayout.addView(tvTotalUsage)
 
         // Botón guardar
         btnSave = Button(this).apply {
-            text = "GUARDAR CONFIGURACIÓN"
+            text = getString(R.string.save_button)
             textSize = 16f
-            setBackgroundColor(Color.parseColor("#2196F3"))
-            setTextColor(Color.WHITE)
             setPadding(24, 16, 24, 16)
         }
         rootLayout.addView(btnSave)
 
-        // Aplicar color de fondo al layout principal
-        rootLayout.setBackgroundColor(getBackgroundColor())
-
         scrollView.addView(rootLayout)
         setContentView(scrollView)
     }
+
+    private fun applyTheme() {
+        val isDark = themeViewModel.isDarkMode
+
+        // Colores para modo oscuro y claro
+        val backgroundColor = if (isDark) Color.parseColor("#121212") else Color.WHITE
+        val textColor = if (isDark) Color.WHITE else Color.BLACK
+        val secondaryTextColor = if (isDark) Color.parseColor("#BBBBBB") else Color.parseColor("#666666")
+        val inputBackgroundColor = if (isDark) Color.parseColor("#1E1E1E") else Color.parseColor("#F5F5F5")
+        val buttonBackgroundColor = if (isDark) Color.parseColor("#BB86FC") else Color.parseColor("#2196F3")
+        val toggleButtonColor = if (isDark) Color.parseColor("#03DAC6") else Color.parseColor("#FF9800")
+
+        // Aplicar colores al layout principal
+        rootLayout.setBackgroundColor(backgroundColor)
+        scrollView.setBackgroundColor(backgroundColor)
+
+        // Aplicar colores a todos los TextViews
+        for (i in 0 until rootLayout.childCount) {
+            val child = rootLayout.getChildAt(i)
+            when (child) {
+                is TextView -> {
+                    if (child == tvLastAccess || child == tvLastLocation || child == tvTotalUsage) {
+                        child.setTextColor(secondaryTextColor)
+                    } else {
+                        child.setTextColor(textColor)
+                    }
+                }
+                is EditText -> {
+                    child.setTextColor(textColor)
+                    child.setBackgroundColor(inputBackgroundColor)
+                    child.setHintTextColor(secondaryTextColor)
+                }
+                is Button -> {
+                    when (child) {
+                        btnToggleTheme -> {
+                            child.setBackgroundColor(toggleButtonColor)
+                            child.setTextColor(Color.WHITE)
+                        }
+                        btnSave -> {
+                            child.setBackgroundColor(buttonBackgroundColor)
+                            child.setTextColor(Color.WHITE)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var isUserSelection = false
 
     private fun setupListeners() {
         btnSave.setOnClickListener {
             saveConfigurations()
         }
 
-        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            // Guardar configuración primero
-            val currentConfig = configManager.loadConfiguration()
-            configManager.saveConfiguration(
-                currentConfig.copy(darkModeEnabled = isChecked)
-            )
-
-            // Cambiar tema y recrear actividad
-            changeTheme(isChecked)
-
-            Toast.makeText(this,
-                if (isChecked) "Modo oscuro activado" else "Modo claro activado",
-                Toast.LENGTH_SHORT).show()
+        btnToggleTheme.setOnClickListener {
+            themeViewModel.toggleDarkMode()
+            btnToggleTheme.text = if (themeViewModel.isDarkMode) getString(R.string.light_mode) else getString(R.string.dark_mode)
+            applyTheme()
+            saveThemePreference()
         }
+
+        // Listener para cambio de idioma - solo cuando el usuario lo selecciona
+        spinnerLanguage.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                // Solo cambiar idioma si es una selección del usuario, no la carga inicial
+                if (isUserSelection) {
+                    val selectedLanguage = when (position) {
+                        0 -> "es" // Español
+                        1 -> "en" // English
+                        2 -> "fr" // Français
+                        3 -> "de" // Deutsch
+                        else -> "es"
+                    }
+                    changeLanguage(selectedLanguage)
+                }
+                // Después de la primera carga, habilitar las selecciones del usuario
+                isUserSelection = true
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun changeLanguage(languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Recrear la actividad para aplicar los cambios
+        recreate()
     }
 
     private fun loadSavedConfigurations() {
         val config = configManager.loadConfiguration()
 
         etUserName.setText(config.userName)
-        switchDarkMode.isChecked = config.darkModeEnabled
+
+        // Deshabilitar temporalmente la selección del usuario
+        isUserSelection = false
 
         val languages = arrayOf("Español", "English", "Français", "Deutsch")
         val languageIndex = languages.indexOf(config.preferredLanguage)
@@ -241,15 +321,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         seekBarVolume.progress = config.notificationVolume
-        tvLastAccess.text = "Último acceso: ${config.lastAccessDate}"
-        tvLastLocation.text = "Última ubicación: ${config.lastLocation}"
-        tvTotalUsage.text = "Tiempo total: ${formatUsageTime(config.totalUsageTime)}"
+        tvLastAccess.text = "${getString(R.string.last_access)} ${config.lastAccessDate}"
+        tvLastLocation.text = "${getString(R.string.last_location)} ${config.lastLocation}"
+        tvTotalUsage.text = "${getString(R.string.total_usage)} ${formatUsageTime(config.totalUsageTime)}"
     }
 
     private fun saveConfigurations() {
         val config = UserConfiguration(
             userName = etUserName.text.toString(),
-            darkModeEnabled = switchDarkMode.isChecked,
+            darkModeEnabled = themeViewModel.isDarkMode,
             preferredLanguage = spinnerLanguage.selectedItem.toString(),
             notificationVolume = seekBarVolume.progress,
             lastAccessDate = Date().toString(),
@@ -258,59 +338,27 @@ class MainActivity : AppCompatActivity() {
         )
 
         configManager.saveConfiguration(config)
-        Toast.makeText(this, "Configuraciones guardadas", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.configurations_saved), Toast.LENGTH_SHORT).show()
 
         // Obtener ubicación actual
         getCurrentLocation()
     }
 
-    private fun changeTheme(darkMode: Boolean) {
-        if (darkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-        // Recrear la actividad para aplicar el tema inmediatamente
-        recreate()
+    private fun loadSavedTheme() {
+        val config = configManager.loadConfiguration()
+        themeViewModel.setDarkMode(config.darkModeEnabled)
     }
 
-    // Funciones auxiliares para obtener colores según el tema
-    private fun isDarkMode(): Boolean {
-        val nightModeFlags = resources.configuration.uiMode and
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES
-    }
-
-    private fun getThemeColor(): Int {
-        return if (isDarkMode()) Color.WHITE else Color.BLACK
-    }
-
-    private fun getSecondaryTextColor(): Int {
-        return if (isDarkMode()) Color.parseColor("#CCCCCC") else Color.parseColor("#666666")
-    }
-
-    private fun getBackgroundColor(): Int {
-        return if (isDarkMode()) Color.parseColor("#121212") else Color.WHITE
-    }
-
-    private fun getEditTextBackgroundColor(): Int {
-        // Usar un color personalizado según el tema
-        val nightModeFlags = resources.configuration.uiMode and
-                android.content.res.Configuration.UI_MODE_NIGHT_MASK
-        return if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
-            Color.parseColor("#333333") // Gris oscuro para modo oscuro
-        } else {
-            Color.parseColor("#F5F5F5") // Gris claro para modo claro
-        }
-    }
-
-    private fun getHintColor(): Int {
-        return if (isDarkMode()) Color.parseColor("#888888") else Color.parseColor("#999999")
+    private fun saveThemePreference() {
+        // Guardar solo la preferencia del tema sin afectar otras configuraciones
+        val currentConfig = configManager.loadConfiguration()
+        val updatedConfig = currentConfig.copy(darkModeEnabled = themeViewModel.isDarkMode)
+        configManager.saveConfiguration(updatedConfig)
     }
 
     private fun updateLastAccess() {
         val currentDate = Date().toString()
-        tvLastAccess.text = "Último acceso: $currentDate"
+        tvLastAccess.text = "${getString(R.string.last_access)} $currentDate"
     }
 
     private fun formatUsageTime(milliseconds: Long): String {
@@ -348,7 +396,7 @@ class MainActivity : AppCompatActivity() {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 location?.let {
                     val locationText = "Lat: ${it.latitude}, Lng: ${it.longitude}"
-                    tvLastLocation.text = "Última ubicación: $locationText"
+                    tvLastLocation.text = "${getString(R.string.last_location)} $locationText"
                 }
             }
         }
