@@ -64,6 +64,13 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    // Firebase (usando BoM)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
+    // JSON
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Compose
     implementation(libs.androidx.core.ktx)
@@ -74,10 +81,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("com.google.firebase:firebase-messaging:23.4.1")
 
     // Tests
-    testImplementation(libs.junit) // junit:4.13.2 desde libs.versions.toml
+    testImplementation(libs.junit) // junit:4.13.2
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
     testImplementation("androidx.arch.core:core-testing:2.2.0")
 
@@ -89,5 +95,3 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
-
-
