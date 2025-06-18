@@ -53,7 +53,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val channel = NotificationChannel(
                 channelId,
                 "Notificaciones Importantes",
-                NotificationManager.IMPORTANCE_HIGH // 👈 HEADS-UP
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Canal de mensajes tipo WhatsApp"
                 lockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC

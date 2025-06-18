@@ -1,3 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">NotificacionesApp</string>
+    <!-- Nombre de la aplicación -->
+    <string name="app_name">Configuración Segura</string>
+    <string name="app_title">Configuración de Usuario</string>
+
+    <!-- Secciones -->
+    <string name="personal_info_section">Información Personal</string>
+    <string name="interface_preferences_section">Preferencias de Interfaz</string>
+    <string name="audio_settings_section">Configuraciones de Audio</string>
+    <string name="usage_info_section">Información de Uso</string>
+
+    <!-- Campos de entrada -->
+    <string name="user_name_hint">Nombre de usuario</string>
+    <string name="dark_theme_label">Tema oscuro</string>
+    <string name="preferred_language_label">Idioma preferido</string>
+    <string name="notification_volume_label">Volumen de notificaciones</string>
+
+    <!-- Botones -->
+    <string name="save_button">Guardar</string>
+    <string name="reset_button">Restablecer</string>
+    <string name="update_location_button">Actualizar</string>
+
+    <!-- Información de uso -->
+    <string name="last_access_placeholder">Último acceso: Cargando...</string>
+    <string name="location_placeholder">Ubicación: No disponible</string>
+    <string name="usage_time_placeholder">Tiempo total de uso: 00:00:00</string>
+
+    <!-- Mensajes de confirmación -->
+    <string name="reset_confirmation_title">Restablecer Configuración</string>
+    <string name="reset_confirmation_message">¿Estás seguro de que quieres restablecer todas las configuraciones a sus valores por defecto?</string>
+    <string name="yes">Sí</string>
+    <string name="cancel">Cancelar</string>
+
+    <!-- Mensajes de estado -->
+    <string name="configuration_saved">Configuración guardada correctamente</string>
+    <string name="configuration_reset">Configuraciones restablecidas</string>
+    <string name="location_updated">Ubicación actualizada</string>
+    <string name="location_permission_denied">Permisos de ubicación denegados</string>
+    <string name="location_error">Error al obtener ubicación</string>
+    <string name="empty_username_error">El nombre de usuario no puede estar vacío</string>
+
+    <!-- Idiomas disponibles -->
+    <string name="language_spanish">Español</string>
+    <string name="language_english">English</string>
+    <string name="language_french">Français</string>
+    <string name="language_german">Deutsch</string>
+
+    <!-- Descripciones de accesibilidad -->
+    <string name="dark_theme_switch_description">Activar o desactivar tema oscuro</string>
+    <string name="volume_seekbar_description">Ajustar volumen de notificaciones</string>
+    <string name="language_spinner_description">Seleccionar idioma preferido</string>
+
+    <!-- Notificaciones del servicio de seguimiento -->
+    <string name="usage_tracking_notification_title">Seguimiento de Uso Activo</string>
+    <string name="usage_tracking_notification_text">La aplicación está registrando el tiempo de uso</string>
 </resources>
+
